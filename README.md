@@ -57,6 +57,33 @@ docker run -d \
   ghcr.io/moltis-org/pockettts-coqui-bridge:latest
 ```
 
+### Tutorial: Build & Deploy from Source
+If you want to build the image yourself from the source code:
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/moltis-org/pockettts-coqui-bridge.git
+   cd pockettts-coqui-bridge
+   ```
+
+2. **Build the Docker image:**
+   ```bash
+   docker build -t pockettts-bridge .
+   ```
+
+3. **Run the container:**
+   ```bash
+   docker run -d \
+     --name tts-bridge \
+     -p 8000:8000 \
+     -e APP_USERNAME=admin \
+     -e APP_PASSWORD=your_password \
+     -e SESSION_SECRET=$(openssl rand -hex 32) \
+     -v $(pwd)/data:/app/data \
+     --restart always \
+     pockettts-bridge
+   ```
+
 ## 🔌 Moltis Integration
 
 Integrating with your Moltis bot is effortless. Update your `config.toml` to point to your new bridge:
