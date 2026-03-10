@@ -30,17 +30,16 @@ We built this because sovereign infrastructure isn't just a luxury—it's a requ
 *   **🐳 One-Click Deployment** — Fully Dockerized for a "it just works" experience on any server.
 *   **🎨 Admin UI** — A professional, dark-themed dashboard to manage, test, and export your custom voices.
 
-## 🏆 The Killer Edge: Why We Win
+## Why PocketTTS Coqui Bridge?
 
-| Feature | OpenAI / ElevenLabs | Traditional Coqui | **PocketTTS Bridge** |
-| :--- | :--- | :--- | :--- |
-| **Price** | Per-character tax | Free | **$0.00 (Forever)** |
-| **Hardware** | Cloud (Non-Sovereign) | Usually requires GPU | **Standard CPU (Fast)** |
-| **Privacy** | They own your data | Local | **Zero-Knowledge** |
-| **Speed** | Network Latency | Heavy Load | **Instant / Real-time** |
-| **Setup** | API Key | Complex Config | **One-Click Docker** |
+**PocketTTS Coqui Bridge** is a production-oriented FastAPI service that exposes Coqui-compatible TTS endpoints. Designed primarily for the [Moltis](https://github.com/moltis-org/moltis) ecosystem, it allows you to swap expensive, privacy-invasive paid APIs (like OpenAI or ElevenLabs) for a self-hosted powerhouse.
 
-## 🛠 Installation
+*   **Secure by Design** — Your voice data never leaves your network. No telemetry, no "AI safety" filters, no surveillance.
+*   **Production-Ready** — This isn't a hobby script. It’s a FastAPI-wrapped service with session-based authentication, SQLite persistence, and a protected Admin UI.
+*   **Moltis-Native** — Drop-in compatibility for Moltis. Configure it once and your bot has a voice forever, for free.
+*   **One-Click Docker** — Deployment so easy it feels like cheating.
+
+## Installation
 
 ### Deploy in 60 Seconds (Docker)
 The fastest path to sovereign voice:
@@ -57,6 +56,42 @@ docker run -d \
   ghcr.io/moltis-org/pockettts-coqui-bridge:latest
 ```
 
+## Comparison: The End of Paid APIs
+
+| Feature | OpenAI TTS | ElevenLabs | **PocketTTS Bridge** |
+| :--- | :--- | :--- | :--- |
+| **Cost** | Per-character | Tiered / Expensive | **$0.00 (Forever)** |
+| **Privacy** | Logged/Analyzed | Data Harvesting | **Zero-Knowledge** |
+| **Offline** | No | No | **Yes** |
+| **Latency** | Network Dependent | Variable | **Local-speed** |
+| **Custom Voices** | Limited | Paid | **Unlimited Cloning** |
+
+## Architecture
+
+```text
+┌─────────────────┐      ┌──────────────────────────┐      ┌─────────────────┐
+│     Moltis      │      │  PocketTTS Coqui Bridge  │      │   Local Data    │
+│  (Or any App)   │      │       (FastAPI)          │      │    (SQLite)     │
+└────────┬────────┘      └────────────┬─────────────┘      └────────┬────────┘
+         │                            │                             │
+         │   POST /api/tts            │      Register Voice         │
+         ├───────────────────────────►├────────────────────────────►│
+         │                            │      Store Embeddings       │
+         │   Receive .wav             │                             │
+         │◄───────────────────────────┤                             │
+         │                            │      Synthesize             │
+         │                            │◄────────────────────────────┘
+         │                            │      (Pocket-TTS + Coqui)
+```
+
+## Features
+
+*   **Coqui-Compatible API** — Standardized `POST /api/tts` endpoint supporting JSON and Multipart.
+*   **Voice Registry** — Managed via SQLite. Built-in voices + your own high-fidelity clones.
+*   **Protected Admin UI** — Manage voices, test synthesis, and update settings through a clean, Pico.css-powered dashboard.
+*   **Instant Voice Cloning** — Upload a sample, generate an embedding, and use it immediately.
+*   **Multi-Format Support** — Returns high-quality `.wav` or compressed `.mp3` on the fly.
+
 ## 🔌 Moltis Integration
 
 Integrating with your Moltis bot is effortless. Update your `config.toml` to point to your new bridge:
@@ -70,14 +105,36 @@ provider = "coqui"
 endpoint = "http://your-server-ip:8000"
 ```
 
-## ✨ Features
+## Getting Started
 
-*   **Coqui-Compatible API** — Standardized `POST /api/tts` endpoint. Drop-in replacement for existing Coqui setups.
-*   **Advanced Voice Registry** — Managed via SQLite with built-in voices and instant cloning.
-*   **Professional Admin UI** — A polished, dark-themed interface for managing your voice library.
-*   **Real-time Testing** — Test any voice with custom text input and get immediate playback/download.
-*   **Multi-Format Support** — High-quality `.wav` and compressed `.mp3` output.
-*   **Voice Export** — Bundle and export your cloned voices as ZIP archives for easy migration.
+### 1. Configure Moltis
+To use this bridge with your Moltis instance, update your `config.toml`:
+
+```toml
+[voice.tts]
+enabled = true
+provider = "coqui"
+
+[voice.tts.coqui]
+endpoint = "http://localhost:8000"
+```
+
+### 2. Access the Admin UI
+Navigate to `http://localhost:8000` to access the management dashboard.
+*   **Clone voices** by uploading 10-30 seconds of clear audio.
+*   **Preview** voices before deploying them to your bot.
+*   **Monitor** the SQLite registry.
+
+## Local Development (Non-Docker)
+
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+pip install pocket-tts torch --index-url https://download.pytorch.org/whl/cpu
+cp .env.example .env
+# Edit .env with your credentials
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
 
 ---
 
