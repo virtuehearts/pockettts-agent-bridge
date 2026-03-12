@@ -32,13 +32,15 @@ def ffmpeg_available() -> bool:
 
 
 def normalize_to_wav(source: Path, target: Path) -> Path:
-    if source.suffix.lower() == ".wav":
-        if source != target:
-            target.write_bytes(source.read_bytes())
-        return target
     if not ffmpeg_available():
-        raise RuntimeError("ffmpeg is required for non-wav uploads but is not installed")
-    cmd = ["ffmpeg", "-y", "-i", str(source), "-ar", "22050", "-ac", "1", str(target)]
+        if source.suffix.lower() == ".wav":
+            if source != target:
+                target.write_bytes(source.read_bytes())
+            return target
+        raise RuntimeError("ffmpeg is required for audio normalization but is not installed")
+
+    # Always use ffmpeg to ensure 16-bit PCM and 24000Hz mono output
+    cmd = ["ffmpeg", "-y", "-i", str(source), "-ar", "24000", "-ac", "1", "-acodec", "pcm_s16le", str(target)]
     proc = subprocess.run(cmd, capture_output=True, text=True)
     if proc.returncode != 0:
         raise RuntimeError(f"ffmpeg conversion failed: {proc.stderr.strip()}")

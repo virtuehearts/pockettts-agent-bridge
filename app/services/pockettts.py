@@ -106,10 +106,15 @@ class PocketTTSService:
 
     @staticmethod
     def _write_tensor_wav(path: Path, audio, sample_rate: int) -> None:
+        import numpy as np
         import scipy.io.wavfile
 
         path.parent.mkdir(parents=True, exist_ok=True)
-        scipy.io.wavfile.write(str(path), sample_rate, audio.detach().cpu().numpy())
+        # Scale to 16-bit PCM range if necessary and convert to int16
+        data = audio.detach().cpu().numpy()
+        if data.dtype != np.int16:
+            data = (data * 32767.0).astype(np.int16)
+        scipy.io.wavfile.write(str(path), sample_rate, data)
 
     @staticmethod
     def _write_tone(path: Path, *, freq: float, duration_s: float, sample_rate: int = 22050) -> None:
