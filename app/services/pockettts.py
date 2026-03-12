@@ -134,7 +134,13 @@ class PocketTTSService:
         # Scale to 16-bit PCM range if necessary and convert to int16
         data = audio.detach().cpu().numpy()
         if data.dtype != np.int16:
+            # Ensure data is 1D and clipped to [-1, 1] to avoid wrap-around distortion
+            data = np.clip(data, -1.0, 1.0)
             data = (data * 32767.0).astype(np.int16)
+
+        if data.ndim > 1:
+            data = data.squeeze()
+
         scipy.io.wavfile.write(str(path), sample_rate, data)
 
     @staticmethod
