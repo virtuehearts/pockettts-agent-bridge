@@ -92,8 +92,10 @@ async def clone_voice(
     persisted_embedding: str | None = str(embedding_path)
     try:
         tts.clone_and_register_assets(sample_path, embedding_path)
-    except RuntimeError as exc:
-        if 'Pocket-TTS model is unavailable' in str(exc):
+    except Exception as exc:
+        import logging
+        logging.exception("Failed to clone voice assets for %s", voice_id)
+        if isinstance(exc, RuntimeError) and 'Pocket-TTS model is unavailable' in str(exc):
             persisted_embedding = None
         else:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
