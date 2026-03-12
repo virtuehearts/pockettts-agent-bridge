@@ -6,7 +6,7 @@ from pathlib import Path
 import io
 import zipfile
 from fastapi import APIRouter, Body, File, Form, HTTPException, Request, UploadFile
-from fastapi.responses import StreamingResponse
+from fastapi.responses import RedirectResponse, StreamingResponse
 
 from app.services.audio import normalize_to_wav, sanitize_voice_id, timestamped_output, validate_upload
 
@@ -110,14 +110,14 @@ async def clone_voice(
     if counter > 1:
         name = f"{name} ({counter})"
 
-    created = registry.create_cloned(
+    registry.create_cloned(
         voice_id=voice_id,
         name=name,
         sample_path=str(sample_path),
         embedding_path=persisted_embedding,
         metadata=metadata_json,
     )
-    return created
+    return RedirectResponse(url='/voices', status_code=303)
 
 
 @router.get('/voices/{voice_id}/export')
